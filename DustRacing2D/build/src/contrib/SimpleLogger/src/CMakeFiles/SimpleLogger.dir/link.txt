@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wall -Wextra -Wpedantic -fvisibility-inlines-hidden -O3 -DNDEBUG  -shared -Wl,-soname,libSimpleLogger.so -o ../../../../libSimpleLogger.so CMakeFiles/SimpleLogger.dir/SimpleLogger_autogen/mocs_compilation.cpp.o CMakeFiles/SimpleLoggerLib.dir/simple_logger.cpp.o CMakeFiles/SimpleLoggerLib.dir/SimpleLoggerLib_autogen/mocs_compilation.cpp.o 

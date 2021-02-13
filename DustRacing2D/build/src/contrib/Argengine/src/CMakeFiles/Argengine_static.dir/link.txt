@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../../libArgengine_static.a  CMakeFiles/Argengine_static.dir/Argengine_static_autogen/mocs_compilation.cpp.o CMakeFiles/ArgengineLib.dir/argengine.cpp.o CMakeFiles/ArgengineLib.dir/ArgengineLib_autogen/mocs_compilation.cpp.o
+/usr/bin/ranlib ../../../../libArgengine_static.a

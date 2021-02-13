@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/build/src/contrib/Argengine/src/Argengine_static_autogen/mocs_compilation.cpp
+

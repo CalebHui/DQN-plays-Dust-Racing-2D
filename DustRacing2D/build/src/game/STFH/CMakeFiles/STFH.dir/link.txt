@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSTFH.a  CMakeFiles/STFH.dir/data.cpp.o CMakeFiles/STFH.dir/device.cpp.o CMakeFiles/STFH.dir/listener.cpp.o CMakeFiles/STFH.dir/location.cpp.o CMakeFiles/STFH.dir/source.cpp.o CMakeFiles/STFH.dir/STFH_autogen/mocs_compilation.cpp.o
+/usr/bin/ranlib libSTFH.a

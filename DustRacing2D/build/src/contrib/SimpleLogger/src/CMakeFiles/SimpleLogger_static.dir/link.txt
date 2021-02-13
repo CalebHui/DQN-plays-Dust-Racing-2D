@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../../libSimpleLogger_static.a  CMakeFiles/SimpleLogger_static.dir/SimpleLogger_static_autogen/mocs_compilation.cpp.o CMakeFiles/SimpleLoggerLib.dir/simple_logger.cpp.o CMakeFiles/SimpleLoggerLib.dir/SimpleLoggerLib_autogen/mocs_compilation.cpp.o
+/usr/bin/ranlib ../../../../libSimpleLogger_static.a

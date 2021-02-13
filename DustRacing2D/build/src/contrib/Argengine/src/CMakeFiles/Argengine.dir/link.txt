@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wall -Wextra -Wpedantic -O3 -DNDEBUG  -shared -Wl,-soname,libArgengine.so -o ../../../../libArgengine.so CMakeFiles/Argengine.dir/Argengine_autogen/mocs_compilation.cpp.o CMakeFiles/ArgengineLib.dir/argengine.cpp.o CMakeFiles/ArgengineLib.dir/ArgengineLib_autogen/mocs_compilation.cpp.o 

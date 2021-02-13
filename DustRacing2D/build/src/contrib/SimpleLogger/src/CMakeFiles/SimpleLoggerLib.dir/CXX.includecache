@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/build/src/contrib/SimpleLogger/src/SimpleLoggerLib_autogen/mocs_compilation.cpp
+
+/home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/contrib/SimpleLogger/src/simple_logger.cpp
+simple_logger.hpp
+/home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/contrib/SimpleLogger/src/simple_logger.hpp
+chrono
+-
+ctime
+-
+fstream
+-
+iostream
+-
+map
+-
+mutex
+-
+stdexcept
+-
+QDebug
+-
+
+/home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/contrib/SimpleLogger/src/simple_logger.hpp
+cstdio
+-
+memory
+-
+sstream
+-
+
