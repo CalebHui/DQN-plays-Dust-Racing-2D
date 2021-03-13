@@ -48,7 +48,7 @@ def edgeprocessed(image):
                         threshold1 = 200, threshold2 = 300)
     return edgeprocessed_img
 
-def screen_record(): 
+def screen_record1(): 
     last_time = time.time()
     cumulative = refresh_fps_time
     with mss() as sct:
@@ -63,7 +63,7 @@ def screen_record():
                 cv2.destroyAllWindows()
                 break
 
-def screen_record1(): 
+def screen_record(): 
     last_time = time.time()
     cumulative = refresh_fps_time
     with mss() as sct:
