@@ -60,7 +60,7 @@ void StateMachine::quit()
     }
     else if (m_state == StateMachine::State::Menu)
     {
-        emit exitGameRequested();
+        //emit exitGameRequested();
     }
 }
 
@@ -90,8 +90,8 @@ void StateMachine::endFadeIn()
     switch (m_state)
     {
     case State::GameTransitionIn:
-        //m_state = State::DoStartlights;
-        m_state = State::Play;
+        m_state = State::DoStartlights;
+        //m_state = State::Play;
         break;
     case State::MenuTransitionIn:
         m_state = State::Menu;
@@ -123,7 +123,8 @@ void StateMachine::endStartlightAnimation()
 
 void StateMachine::stateInit()
 {
-    m_state = State::DoIntro;
+    //m_state = State::DoIntro;
+    m_state = State::Menu;
 }
 
 void StateMachine::stateDoIntro()
@@ -166,11 +167,13 @@ void StateMachine::stateGameTransitionOut()
 {
     if (m_raceFinished)
     {
-        emit fadeOutRequested(10000, 10000, 0);
+        //emit fadeOutRequested(10000, 10000, 0);
+        emit fadeOutRequested(0, 0, 0);
     }
     else
     {
-        emit fadeOutRequested(0, 2000, 0);
+        emit fadeOutRequested(0, 0, 0);
+        //emit fadeOutRequested(0, 2000, 0);
     }
 }
 
@@ -181,7 +184,6 @@ void StateMachine::stateDoStartlights()
 
 void StateMachine::statePlay()
 {
-    emit raceStarted();
     m_raceFinished = false;
 }
 

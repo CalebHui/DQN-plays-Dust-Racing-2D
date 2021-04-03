@@ -78,7 +78,7 @@ float Startlights::glowScale() const
 
 void Startlights::stateInit()
 {
-    const size_t second = m_stepsPerState;
+    /*const size_t second = m_stepsPerState;
 
     m_pos = MCVector3dF(m_width / 2, 3 * m_height / 2, 0);
     m_animation.init(
@@ -88,7 +88,9 @@ void Startlights::stateInit()
       second / 3);
     m_state = State::Appear;
     m_glowScale = 1.0;
-    InputHandler::setEnabled(false);
+    InputHandler::setEnabled(false);*/
+    emit raceStarted();
+    m_state = State::End;
 }
 
 void Startlights::stateAppear()

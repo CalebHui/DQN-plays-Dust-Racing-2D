@@ -15,7 +15,7 @@
 
 #include "menumanager.hpp"
 #include "menu.hpp"
-
+#include <iostream>
 #include <cassert>
 
 namespace MTFH {
@@ -222,6 +222,11 @@ bool MenuManager::isDone() const
     {
         return m_menuStack.back()->isDone();
     }
+}
+
+size_t MenuManager::size() const
+{
+    return m_menuStack.size();
 }
 
 void MenuManager::stepTime(int msecs)

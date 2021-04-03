@@ -3315,8 +3315,6 @@ tracktile.hpp
 /home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/game/tracktile.hpp
 statemachine.hpp
 /home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/game/statemachine.hpp
-unistd.h
--
 ../common/config.hpp
 /home/caleb/Desktop/caleb/CMSC/CMSC5721/DustRacing2D/src/common/config.hpp
 ../common/targetnodebase.hpp
@@ -4176,24 +4174,6 @@ stddef.h
 bits/types/locale_t.h
 -
 bits/strings_fortified.h
--
-
-/usr/include/AL/../unistd.h
-features.h
--
-bits/posix_opt.h
--
-bits/environments.h
--
-bits/types.h
--
-stddef.h
--
-bits/confname.h
--
-bits/getopt_posix.h
--
-bits/unistd.h
 -
 
 /usr/include/AL/../vorbis/codec.h

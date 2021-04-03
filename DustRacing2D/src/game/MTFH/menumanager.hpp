@@ -99,6 +99,8 @@ public:
     //! \returns true when done.
     bool isDone() const;
 
+    size_t size() const;
+
     static MenuManager & instance();
 
 private:

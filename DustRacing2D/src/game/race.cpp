@@ -28,7 +28,6 @@
 #include "trackobjectfactory.hpp"
 #include "tracktile.hpp"
 #include "statemachine.hpp"
-#include <unistd.h>
 
 #include "../common/config.hpp"
 #include "../common/targetnodebase.hpp"
@@ -439,9 +438,10 @@ void Race::updateRouteProgress(Car & car)
             {
                 checkIfCarIsOffTrack(car);
                 if (car.isOffTrack()) {
-                    std::cout << "LOSE" << std::endl;
-                    StateMachine::instance().quit();
-                    usleep(10);
+                    if (StateMachine::instance().state() != StateMachine::State::GameTransitionOut) {
+                        std::cout << "LOSE" << std::endl;
+                        StateMachine::instance().quit();
+                    }
                 }
             }
 

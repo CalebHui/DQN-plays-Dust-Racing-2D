@@ -206,11 +206,15 @@ bool EventHandler::handleMenuKeyPressEvent(QKeyEvent * event)
         case Qt::Key_Escape:
         case Qt::Key_Q:
             emit soundRequested("menuClick");
+            if (MTFH::MenuManager::instance().size() != 1) {
+                MTFH::MenuManager::instance().activeMenu()->exit();
+            }
+            /*emit soundRequested("menuClick");
             MTFH::MenuManager::instance().activeMenu()->exit();
             if (MTFH::MenuManager::instance().isDone())
             {
                 emit gameExited();
-            }
+            }*/
             break;
         default:
             return false;

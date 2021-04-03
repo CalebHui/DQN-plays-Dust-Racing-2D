@@ -58,7 +58,7 @@ void Timing::setLapCompleted(size_t index, bool isHuman)
     {
         juzzlin::L().debug() << "Human lap completed: " << times.lastLapTime;
         juzzlin::L().debug() << "Current lap record: " << m_lapRecord;
-        std::cout << "finish lap" << std::endl;
+        std::cout << "FINISH_LAP" << std::endl;
         if (times.lastLapTime < m_lapRecord || m_lapRecord == -1)
         {
             m_lapRecord = times.lastLapTime;
@@ -79,7 +79,7 @@ void Timing::setRaceCompleted(size_t index, bool state, bool isHuman)
 
     if (isHuman)
     {
-        std::cout << "finish race" << std::endl;
+        std::cout << "FINISH_GAME" << std::endl;
         // + std::to_string(times.raceTime) << std::endl;
         if (times.raceTime < m_raceRecord || m_raceRecord == -1)
         {

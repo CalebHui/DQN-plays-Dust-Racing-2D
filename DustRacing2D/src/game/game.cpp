@@ -74,6 +74,8 @@ Game::Game(int & argc, char ** argv)
   , m_paused(false)
   , m_renderElapsed(0)
   , m_fps(m_settings.loadValue(Settings::fpsKey()) == 30 ? Fps::Fps30 : Fps::Fps60)
+  //change default mode here
+  //, m_mode(Mode::OnePlayerRace)
   , m_mode(Mode::TimeTrial)
   , m_splitType(SplitType::Vertical)
   , m_audioWorker(new AudioWorker(
