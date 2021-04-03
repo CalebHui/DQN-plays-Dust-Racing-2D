@@ -26,7 +26,8 @@ class DustRacingRL:
         self.last_action = None
         self.car_mon = {'top': 114+57-42-70, 'left': 322+58-31-70, 'width': 540, 'height': 540}
         #self.resize_dim = (256,256)
-        self.resize_dim = (128,128)
+        #self.resize_dim = (128,128)
+        self.resize_dim = (84,84)
         #self.input_shape = (1, *self.resize_dim)
         self.input_shape = self.resize_dim
         self.sct = mss()
@@ -70,16 +71,24 @@ class DustRacingRL:
         #shape: (1,128,128) (channel,h,w)
         #return np.expand_dims(frame, 0)
         #shape: (128,128)
-        return frame
+        #normalization
+        return frame/255.0
+        #zero mean
+        #return frame-frame.mean()
+        #normalization + zero mean
+        """frame = frame/255.0
+        return frame-frame.mean()"""
+        #standardization
+        #return (frame-frame.mean())/frame.std()
 
     def step(self, action):
         action = self.action_space[action]
         next_state = None
-        reward = -0.01
+        reward = -0.03
         #get reward when go forward
         if Key.up in action:
             #print('up')
-            reward = 0.01
+            reward = 0.5
         done = False
         info = None
         if self.last_action and self.last_action != action:
@@ -93,16 +102,19 @@ class DustRacingRL:
             msg = self.state_queue.get_nowait() # or q.get(timeout=.1)
             msg = msg.strip("\n")
             if msg == 'LOSE':
-                reward = -100
+                reward = -1
                 done = True
             elif msg == 'FINISH_LAP':
-                reward = +100
+                reward = +1
+                info = msg
             elif msg == 'FINISH_GAME':
-                reward = +100
+                reward = +1
                 done = True
-                self.clean_up()
+                info = msg
         except:
             pass
+        if done:
+            self.clean_up()
         return next_state, reward, done, info
 
     def focus_window(self):
