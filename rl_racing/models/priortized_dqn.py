@@ -18,9 +18,10 @@ from statistics import mean
 import collections, itertools
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+from .prioritized_buffer import Memory
 
-class DqnModel(AbstractModel):
-    def __init__(self, env, network_type='CnnDQN', epsilon_start = 1, epsilon_final = 0.01, epsilon_decay = 100000, gamma = 0.99, batch_size = 32, buffer_size = 20000, tau=4):
+class PrioritizedDqnModel(AbstractModel):
+    def __init__(self, env, network_type='CnnDQN', epsilon_start = 1, epsilon_final = 0.01, epsilon_decay = 100000, gamma = 0.99, batch_size = 32, buffer_size = 30000, tau=4):
         super().__init__(env)
         self.training_episodes = 0
         self.epsilon_start = epsilon_start
@@ -29,7 +30,7 @@ class DqnModel(AbstractModel):
         self.buffer_size = buffer_size
         self.batch_size = batch_size
         self.gamma = gamma
-        self.replay_buffer = ReplayBuffer(buffer_size)
+        self.replay_buffer = Memory(buffer_size)
         self.tau = tau
         self.state_buffer = deque(maxlen=tau)
         self.losses = []
@@ -65,7 +66,8 @@ class DqnModel(AbstractModel):
         self.training_episodes = checkpoint['episodes']
         self.all_rewards = checkpoint['all_rewards']
         self.losses = checkpoint['losses']
-        self.replay_buffer.load(checkpoint['replay_buffer'])
+        # disable this when training
+        self.replay_buffer.tree.data = checkpoint['replay_buffer']
         self.tot_reward = checkpoint['tot_reward']
         self.update_target()
         self.set_gpu()
@@ -73,10 +75,10 @@ class DqnModel(AbstractModel):
     def save(self, filename):
         """ Save model to file. """
         path = '{}/save/doubledqn/{}-{}'.format(dir_path, self.network_type, filename)
-        saved_buffer_len = 1500
-        buffer = self.replay_buffer.buffer
-        if len(buffer) >= saved_buffer_len:
-            buffer = list(itertools.islice(buffer, len(buffer) - saved_buffer_len, len(buffer)))
+        saved_buffer_len = 1000
+        buffer = self.replay_buffer.tree.data
+        if len(self.replay_buffer) >= saved_buffer_len:
+            buffer = self.replay_buffer.tree.data[0:saved_buffer_len]
         state = {
             'episodes': self.training_episodes,
             'state_dict': self.current_model.state_dict(),
@@ -93,7 +95,7 @@ class DqnModel(AbstractModel):
         self.state_buffer.clear()
         #[self.state_buffer.append(np.zeros(self.env.input_shape)) for i in range(self.tau)]
 
-    def train(self, episodes = 1000000):
+    def train(self, episodes = 600000):
         eps_by_episode = lambda episode: self.epsilon_final + (self.epsilon_start - self.epsilon_final) * math.exp(-1. * episode / self.epsilon_decay)
         
         episode_reward = 0
@@ -146,7 +148,10 @@ class DqnModel(AbstractModel):
                 frame = np.maximum(secondlast_frame, last_frame)
             else:
                 frame = last_frame
-
+            """cv2.imshow('rl_image', np.squeeze(frame))
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+                break"""
             # if done => use last reward(lose/finsih)
             if not done:
                 reward = mean(rewards)
@@ -154,7 +159,7 @@ class DqnModel(AbstractModel):
             episode_reward += reward
             self.state_buffer.append(frame)
             next_state = np.stack(self.state_buffer)
-            self.replay_buffer.push(state, action, reward, next_state, done)
+            self.replay_buffer.store(state, action, reward, next_state, done)
 
             #penalty threshold
             if episode_reward <= -0.5:
@@ -179,14 +184,24 @@ class DqnModel(AbstractModel):
                 frame = self.env.reset()
                 for i in range(self.tau):
                     self.state_buffer.append(frame)
+            
+            """if len(self.replay_buffer) > self.batch_size:
+                loss = self.compute_td_loss(self.batch_size)
+                self.losses.append(loss.item())"""
+            """if episode % 100 == 0:
+                plot(self.training_episodes, self.all_rewards, self.losses)"""
 
             if self.training_episodes % 4000 == 0:
                 self.update_target()
         #save the model when the training ends
         self.save(str(self.training_episodes)+'.pt')
         plot(self.training_episodes, self.all_rewards, self.losses)
+        #plt.plot([eps_by_episode(i) for i in range(10000)])
+        #plt.show()
 
     def play(self, episodes = 1, plot_stat=False, random_model=False):
+        #modify frame_skipping to adjust the fps
+        #In my experiments, the fps is around 12-13 fps
         frame_skipping = 35
         episode_reward = 0
         tot_reward = 0
@@ -280,13 +295,14 @@ class DqnModel(AbstractModel):
         return tot_reward, finish_lap, finish_game
 
     def compute_td_loss(self, batch_size):
-        state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
+        state, action, reward, next_state, done, indices, weights = self.replay_buffer.sample(batch_size)
 
         state      = autograd.Variable(torch.cuda.FloatTensor(np.float32(state)))
         next_state = autograd.Variable(torch.cuda.FloatTensor(np.float32(next_state)), volatile=True)
         action     = autograd.Variable(torch.cuda.LongTensor(action))
         reward     = autograd.Variable(torch.cuda.FloatTensor(reward))
         done       = autograd.Variable(torch.cuda.FloatTensor(done))
+        weights    = autograd.Variable(torch.cuda.FloatTensor(weights))
 
         q_values      = self.current_model(state)
         next_q_values = self.current_model(next_state)
@@ -294,7 +310,9 @@ class DqnModel(AbstractModel):
         q_value          = q_values.gather(1, action.unsqueeze(1)).squeeze(1) 
         next_q_value     = next_q_state_values.gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1)).squeeze(1)
         expected_q_value = reward + self.gamma * next_q_value * (1 - done)
-        loss = (q_value - autograd.Variable(expected_q_value.data)).pow(2).mean()
+        loss = (q_value - autograd.Variable(expected_q_value.data)).pow(2) * weights
+        self.replay_buffer.batch_update(indices, loss.data.cpu().numpy())
+        loss = loss.mean()
         self.optimizer.zero_grad()
         loss.backward()
         for param in self.current_model.parameters():
@@ -320,8 +338,10 @@ class DqnModel(AbstractModel):
 
     def debug_buffer(self, index):
         #plot(self.training_episodes, self.all_rewards, self.losses)
-        print('episode in buffer:{}/{}'.format(index+1, len(self.replay_buffer.buffer)))
+        print('episode in buffer:{}/{}'.format(index+1, len(self.replay_buffer.tree.data)))
         state, action, reward, next_state, done = self.replay_buffer.peek(index)
+        for p in self.current_model.parameters():
+            print('===========\ngradient:{}\n----------\n'.format(torch.max(p)))
         print(state.nbytes)
         print('action:{}'.format(self.env.action_space[action]))
         print('reward:{}'.format(reward))
@@ -420,10 +440,6 @@ class DDQN(nn.Module):
         
     def forward(self, x):
         advantage, value = self.get_advantage_n_value(x)
-        """x = self.features(x)
-        x = x.view(x.size(0), -1)
-        advantage = self.advantage(x)
-        value     = self.value(x)"""
         return value + advantage  - advantage.mean()
     
     def get_advantage_n_value(self, x):
@@ -453,15 +469,6 @@ class CnnDQN(nn.Module):
         
         self.input_shape = input_shape
         self.num_actions = num_actions
-        
-        """self.features = nn.Sequential(
-            nn.Conv2d(input_shape[0], 16, kernel_size=3),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(16, 32, kernel_size=3),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2)
-        )"""
 
         self.features = nn.Sequential(
             nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),

@@ -11,7 +11,7 @@ class Action:
     UP = {Key.up}
     LEFT = {Key.left}
     RIGHT = {Key.right}
-    #DOWN = {Key.down}
+    DOWN = {Key.down}
     UP_LEFT = {Key.up,Key.left}
     UP_RIGHT = {Key.up,Key.right}
     #DOWN_LEFT = {Key.down,Key.left}
@@ -20,15 +20,12 @@ class DustRacingRL:
     def __init__(self):
         self.state_queue, self.pid, self.win_ids = start_game()
         self.keyboard = Controller()
-        #self.action_space = [Action.UP, Action.LEFT, Action.RIGHT, Action.DOWN, Action.UP_LEFT, Action.UP_RIGHT, Action.DOWN_LEFT, Action.DOWN_RIGHT]
         self.action_space = [Action.UP, Action.LEFT, Action.RIGHT, Action.UP_LEFT, Action.UP_RIGHT]
-        #self.action_space = [Action.UP, Action.UP_LEFT, Action.UP_RIGHT]
         self.last_action = None
         self.car_mon = {'top': 114+57-42-70, 'left': 322+58-31-70, 'width': 540, 'height': 540}
         #self.resize_dim = (256,256)
-        #self.resize_dim = (128,128)
-        self.resize_dim = (84,84)
-        #self.input_shape = (1, *self.resize_dim)
+        self.resize_dim = (128,128)
+        #self.resize_dim = (84,84)
         self.input_shape = self.resize_dim
         self.sct = mss()
 
@@ -60,17 +57,6 @@ class DustRacingRL:
         car_box = self.sct.grab(self.car_mon)
         car_box =  np.array(Image.frombytes('RGB', (car_box.width, car_box.height), car_box.bgra, "raw", "BGRX"))
         frame = cv2.cvtColor(cv2.resize(car_box, self.resize_dim), cv2.COLOR_BGR2GRAY)
-
-        """with mss() as sct:
-            car_box = sct.grab(self.car_mon)
-            car_box =  np.array(Image.frombytes('RGB', (car_box.width, car_box.height), car_box.bgra, "raw", "BGRX"))
-            car_box = cv2.cvtColor(cv2.resize(car_box, self.resize_dim), cv2.COLOR_BGR2GRAY)
-            frame = car_box"""
-        # add channel
-        #return torch.tensor(np.expand_dims(state, 0), device = self.device)
-        #shape: (1,128,128) (channel,h,w)
-        #return np.expand_dims(frame, 0)
-        #shape: (128,128)
         #normalization
         return frame/255.0
         #zero mean
@@ -80,6 +66,10 @@ class DustRacingRL:
         return frame-frame.mean()"""
         #standardization
         #return (frame-frame.mean())/frame.std()
+        #edge detection
+        """frame = cv2.Canny(frame, threshold1 = 200, threshold2 = 300)
+        frame = frame/255.0
+        return frame"""
 
     def step(self, action):
         action = self.action_space[action]
@@ -120,23 +110,3 @@ class DustRacingRL:
     def focus_window(self):
         for win_id in self.win_ids:
             subprocess.run(["xdotool", "windowfocus", str(win_id)])
-
-    def play(self, model):
-        self.reset()
-        state = self.__observe()
-        total_reward = 0
-        while True:
-            #################
-            cv2.imshow('rl_image', np.squeeze(state))
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-                break
-            #state = self.__observe()
-            #################
-            action = model.predict(state=state)
-            #print(action)
-            state, reward, done, info = self.step(action)
-            total_reward += reward
-            if done:
-                print('total_reward:', total_reward)
-                return total_reward

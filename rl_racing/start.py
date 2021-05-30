@@ -14,7 +14,7 @@ def start_game():
     os.chdir("DustRacing2D/build")
     p = subprocess.Popen([program_path], stdout=subprocess.PIPE)
     print(p.pid)
-    time.sleep(10)
+    time.sleep(5)
     win_ids = subprocess.run(["xdotool", "search", "--pid", str(p.pid).strip()], capture_output=True, text=True).stdout.strip("\n")
     win_ids = win_ids.split('\n')
     for win_id in win_ids:
